@@ -219,7 +219,7 @@ def test_admin_views_user_list(admin_page: Page):
     AdminDashboardPage(admin_page).open()
     admin_page.wait_for_load_state("networkidle")
     # Admin nav links are inside the hamburger menu — open it first
-    admin_page.locator("[data-test='nav-user-menu']").click()
+    admin_page.locator("[data-test='nav-menu']").click()
     admin_page.wait_for_timeout(300)
     admin_page.locator("[data-test='nav-admin-users']").click()
     admin_page.wait_for_load_state("networkidle")

@@ -1,6 +1,6 @@
 # UI Selectors — Practice Software Testing
 
-> Status: Initial draft — selectors need verification against the live app.
+> Status: Verified against live Angular source (testsmith-io/practice-software-testing sprint5).
 > Tool: Playwright Python (`page.locator(...)`)
 
 Base URL: https://practicesoftwaretesting.com
@@ -16,7 +16,7 @@ Base URL: https://practicesoftwaretesting.com
 | Search button      | `[data-test="search-submit"]`                 |
 | Cart icon          | `[data-test="nav-cart"]`                      |
 | Sign In link       | `[data-test="nav-sign-in"]`                   |
-| User menu          | `[data-test="nav-user-menu"]`                 |
+| User menu (dropdown toggle) | `[data-test="nav-menu"]`             |
 | Admin link         | `[data-test="nav-admin"]`                     |
 | Categories filter  | `[data-test="category-link"]` (multiple)      |
 
