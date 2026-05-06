@@ -191,7 +191,7 @@ def admin_token() -> str:
 @pytest.fixture
 def user_context(browser: Browser, user_token: str, browser_context_args) -> BrowserContext:
     """Browser context with the customer JWT pre-loaded into localStorage."""
-    context = browser.new_context(**browser_context_args, base_url=BASE_URL)
+    context = browser.new_context(**{**browser_context_args, "base_url": BASE_URL})
     context.add_init_script(
         f"window.localStorage.setItem('{AUTH_TOKEN_KEY}', '{user_token}')"
     )
@@ -202,7 +202,7 @@ def user_context(browser: Browser, user_token: str, browser_context_args) -> Bro
 @pytest.fixture
 def admin_context(browser: Browser, admin_token: str, browser_context_args) -> BrowserContext:
     """Browser context with the admin JWT pre-loaded into localStorage."""
-    context = browser.new_context(**browser_context_args, base_url=BASE_URL)
+    context = browser.new_context(**{**browser_context_args, "base_url": BASE_URL})
     context.add_init_script(
         f"window.localStorage.setItem('{AUTH_TOKEN_KEY}', '{admin_token}')"
     )

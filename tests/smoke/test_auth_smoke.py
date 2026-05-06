@@ -38,7 +38,7 @@ def test_logout_clears_session(page: Page, session_user_email: str, session_user
     page.wait_for_url(lambda url: "/auth/login" not in url, timeout=8_000)
 
     # Sign out via nav
-    page.locator("[data-test='nav-menu']").click()
+    page.locator("[data-test='nav-user-menu']").click()
     page.locator("[data-test='nav-sign-out']").click()
 
     # Should return to unauthenticated state (login link visible)
