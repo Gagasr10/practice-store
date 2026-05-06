@@ -12,7 +12,8 @@ class AccountPage(BasePage):
         self.invoice_rows = page.locator("[data-test='invoice-row']")
 
     def open(self) -> "AccountPage":
-        self.page.goto(f"{BASE_URL}/account", wait_until="networkidle")
+        self.page.goto(f"{BASE_URL}/account")
+        self.page.wait_for_selector("[data-test='nav-invoices']", state="visible", timeout=30_000)
         return self
 
     def go_to_orders(self) -> "AccountPage":

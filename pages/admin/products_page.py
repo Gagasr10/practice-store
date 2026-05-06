@@ -19,7 +19,8 @@ class AdminProductsPage(BasePage):
         self.category_select = page.locator("[data-test='category-id']")
 
     def open(self) -> "AdminProductsPage":
-        self.page.goto(f"{BASE_URL}/admin/products", wait_until="networkidle")
+        self.page.goto(f"{BASE_URL}/admin/products")
+        self.page.wait_for_selector("[data-test='product-add']", state="visible", timeout=30_000)
         return self
 
     def click_add_new(self) -> None:

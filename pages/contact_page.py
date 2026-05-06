@@ -15,7 +15,8 @@ class ContactPage(BasePage):
         self.success_message = page.locator("[data-test='contact-succes'], [data-test='contact-success'], .alert-success")
 
     def open(self) -> "ContactPage":
-        self.page.goto(f"{BASE_URL}/contact", wait_until="networkidle")
+        self.page.goto(f"{BASE_URL}/contact")
+        self.page.wait_for_selector("[data-test='first-name']", state="visible", timeout=30_000)
         return self
 
     def fill_and_submit(

@@ -1,3 +1,4 @@
+import time
 import uuid
 import requests
 import pytest
@@ -34,8 +35,20 @@ def configure_playwright_defaults():
 
 @pytest.fixture(scope="session", autouse=True)
 def reset_db():
-    """Reset the shared practice-store database to its seed state."""
-    requests.post(f"{API_BASE_URL}/refresh")
+    """Reset the shared practice-store database and wait until products are seeded."""
+    requests.post(f"{API_BASE_URL}/refresh", timeout=30)
+    deadline = time.time() + 90
+    while time.time() < deadline:
+        try:
+            r = requests.get(f"{API_BASE_URL}/products", timeout=10)
+            if r.status_code == 200:
+                body = r.json()
+                items = body.get("data", body) if isinstance(body, dict) else body
+                if isinstance(items, list) and len(items) > 0:
+                    return
+        except Exception:
+            pass
+        time.sleep(3)
 
 
 # ---------------------------------------------------------------------------

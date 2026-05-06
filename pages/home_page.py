@@ -18,7 +18,8 @@ class HomePage(BasePage):
         )
 
     def open(self) -> "HomePage":
-        self.page.goto(BASE_URL, wait_until="networkidle")
+        self.page.goto(BASE_URL)
+        self.page.wait_for_selector("a[data-test^='product-']", state="visible", timeout=60_000)
         return self
 
     def search(self, keyword: str) -> "HomePage":

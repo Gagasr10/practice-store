@@ -14,7 +14,8 @@ class AdminDashboardPage(BasePage):
         self.reports_nav = page.locator("[data-test='nav-admin-statistics']")
 
     def open(self) -> "AdminDashboardPage":
-        self.page.goto(f"{BASE_URL}/admin", wait_until="networkidle")
+        self.page.goto(f"{BASE_URL}/admin")
+        self.page.wait_for_selector("[data-test='nav-admin-products']", state="visible", timeout=30_000)
         return self
 
     def go_to_products(self) -> None:

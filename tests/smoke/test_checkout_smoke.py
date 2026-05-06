@@ -20,7 +20,7 @@ def test_full_checkout_cash_on_delivery(user_page: Page):
     user_page.wait_for_load_state("networkidle")
 
     # 2. Navigate to checkout and proceed past cart step
-    user_page.goto(f"{BASE_URL}/checkout", wait_until="networkidle")
+    user_page.goto(f"{BASE_URL}/checkout")
     cart = CartPage(user_page)
     expect(cart.proceed_button).to_be_visible(timeout=6_000)
     cart.proceed_to_checkout()

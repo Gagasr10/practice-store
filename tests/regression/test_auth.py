@@ -130,7 +130,8 @@ def test_change_password_authenticated(browser):
     ctx.add_init_script(f"window.localStorage.setItem('{AUTH_TOKEN_KEY}', '{token}')")
     page = ctx.new_page()
     try:
-        page.goto(f"{BASE_URL}/account", wait_until="networkidle")
+        page.goto(f"{BASE_URL}/account")
+        page.wait_for_selector("[data-test='nav-profile']", state="visible", timeout=30_000)
         page.locator("[data-test='nav-profile']").click()
         page.wait_for_load_state("networkidle")
         page.locator("[data-test='current-password']").fill(throwaway_old)
