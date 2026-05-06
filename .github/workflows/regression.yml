@@ -1,0 +1,64 @@
+name: Regression Tests
+
+on:
+  schedule:
+    - cron: "0 2 * * *"   # 02:00 UTC nightly
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: regression-${{ github.ref }}
+  cancel-in-progress: false   # let nightly runs finish even if a new one queues
+
+jobs:
+  regression:
+    name: Regression (P1)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: playwright install chromium --with-deps
+
+      - name: Run regression tests
+        run: |
+          mkdir -p results
+          pytest tests/regression/ -m regression \
+            -v --tb=short \
+            --junit-xml=results/regression.xml \
+            --alluredir=allure-results
+
+      - name: Upload JUnit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-junit-${{ github.run_number }}
+          path: results/regression.xml
+          retention-days: 60
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.run_number }}
+          path: allure-results/
+          retention-days: 60
+
+      - name: Publish test summary
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: results/regression.xml
+          check_name: Regression Test Results
+          fail_on_failure: true

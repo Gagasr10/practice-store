@@ -1,0 +1,60 @@
+name: Allure Report (GitHub Pages)
+
+on:
+  workflow_run:
+    workflows: ["Regression Tests"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish Allure to GitHub Pages
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion != 'cancelled' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Allure results from regression run
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results-${{ github.event.workflow_run.run_number }}
+          path: allure-results/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore previous Allure history (for trend charts)
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-prev
+        continue-on-error: true   # first run: gh-pages branch doesn't exist yet
+
+      - name: Copy history into new results
+        run: |
+          if [ -d gh-pages-prev/allure/history ]; then
+            cp -r gh-pages-prev/allure/history allure-results/history
+          fi
+
+      - name: Install Allure CLI
+        run: |
+          curl -sSLo allure.tgz \
+            https://github.com/allure-framework/allure2/releases/download/2.29.0/allure-2.29.0.tgz
+          tar -xzf allure.tgz
+          echo "$PWD/allure-2.29.0/bin" >> $GITHUB_PATH
+
+      - name: Generate Allure HTML report
+        run: allure generate allure-results -o allure-report --clean
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-report
+          publish_branch: gh-pages
+          destination_dir: allure
+          keep_files: false
