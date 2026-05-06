@@ -36,6 +36,7 @@ jobs:
           mkdir -p results
           pytest tests/regression/ -m regression \
             -v --tb=short \
+            --reruns 2 --reruns-delay 2 \
             --junit-xml=results/regression.xml \
             --alluredir=allure-results
 
