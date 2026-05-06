@@ -19,7 +19,7 @@
 | Testing tool | Playwright Python |
 | CI tool | GitHub Actions |
 | Started | 2026-04-30 |
-| Last updated | 2026-05-02 |
+| Last updated | 2026-05-06 |
 
 ---
 
@@ -34,7 +34,7 @@
 | 5 — Tests | ✅ Done | 2026-05-01 | 67 tests implemented (regression + edge) |
 | 5b — Live fix | ✅ Done | 2026-05-02 | All regression tests pass: 49 passed, 5 skipped, 1 xfailed, 0 failures |
 | 6 — CI/CD | ✅ Done | 2026-05-02 | 3 workflows: smoke (push/PR), regression (nightly+PR), Allure Pages |
-| 7 — Delivery | ⬜ Not started | — | — |
+| 7 — Delivery | ✅ Done | 2026-05-06 | README.md, .gitignore, initial git commit (50 files, 3739 lines) |
 
 Status legend: ⬜ Not started · 🔄 In progress · ✅ Done
 
@@ -43,16 +43,16 @@ Status legend: ⬜ Not started · 🔄 In progress · ✅ Done
 ## Current state
 
 ### Where we left off
-Phase 6 done — 3 GitHub Actions workflows created:
-- `.github/workflows/smoke.yml` — P0 smoke tests on every push/PR, ≤15 min, no retries, JUnit artifact
-- `.github/workflows/regression.yml` — P1 regression nightly (02:00 UTC) + PR to main + manual dispatch, ≤30 min, with --reruns 2, JUnit + Allure artifacts
-- `.github/workflows/allure-report.yml` — publishes Allure HTML with history to GitHub Pages (gh-pages branch /allure) after each regression run
+Phase 7 done — all phases complete:
+- `README.md` written: quick start, test commands, project structure, CI/CD table, test accounts, known issues
+- `.gitignore` finalized (added `results/`, `.claude/`)
+- Initial git commit created: 50 files, 3739 lines
 
 ### Next step
-Phase 7 — Delivery: finalize README, repo setup instructions, and hand-off documentation.
+Project complete. Push to GitHub remote when ready (`git push -u origin main`).
 
 ### Blockers
-None
+None — repo not yet pushed to a remote
 
 ---
 
@@ -138,3 +138,4 @@ Type: test-bug / app-bug / flaky / blocked
 | 2026-05-01 | Phase 5 done — 67 regression+edge tests implemented (test_auth, products, cart, checkout, account, contact, admin, guest, 2fa, cart_edge, misc) |
 | 2026-05-02 | Phase 5b done — ran all regression tests against live app, fixed all selector/assertion mismatches: 49 passed, 5 skipped, 1 xfailed, 0 failures |
 | 2026-05-02 | Phase 6 done — GitHub Actions CI/CD: smoke.yml, regression.yml, allure-report.yml; pytest-rerunfailures added to requirements.txt |
+| 2026-05-06 | Phase 7 done — README.md, .gitignore finalized, initial git commit (50 files, 3739 lines) |
