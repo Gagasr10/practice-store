@@ -30,9 +30,22 @@ jobs:
       - name: Install Playwright browsers
         run: playwright install chromium --with-deps
 
+      - name: Diagnose site reachability
+        run: |
+          echo "=== HTTP status ==="
+          curl -s -o /dev/null -w "HTTP %{http_code}  final-url: %{url_effective}\n" \
+            -L --max-time 20 "https://practicesoftwaretesting.com"
+          echo ""
+          echo "=== Response headers ==="
+          curl -s -I -L --max-time 20 "https://practicesoftwaretesting.com" | head -30
+          echo ""
+          echo "=== First 60 lines of HTML ==="
+          curl -s -L --max-time 20 "https://practicesoftwaretesting.com" | head -60
+        continue-on-error: true
+
       - name: Run smoke tests
         run: |
-          mkdir -p results
+          mkdir -p results screenshots
           pytest tests/smoke/ -m smoke \
             -v --tb=short \
             --junit-xml=results/smoke.xml \
@@ -45,6 +58,14 @@ jobs:
           name: smoke-results-${{ github.run_number }}
           path: results/smoke.xml
           retention-days: 30
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-screenshots-${{ github.run_number }}
+          path: screenshots/
+          retention-days: 7
 
       - name: Publish test summary
         if: always()

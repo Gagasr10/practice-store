@@ -1,3 +1,4 @@
+import os
 import time
 import uuid
 import requests
@@ -27,6 +28,63 @@ from data.test_data import (
 def configure_playwright_defaults():
     """Raise assertion timeout from 5s to 15s to give Angular time to render on CI."""
     pw_expect.set_options(timeout=15_000)
+
+
+# ---------------------------------------------------------------------------
+# Browser launch args — disable automation fingerprinting
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="session")
+def browser_type_launch_args(browser_type_launch_args):
+    return {
+        **browser_type_launch_args,
+        "args": [
+            "--disable-blink-features=AutomationControlled",
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+        ],
+    }
+
+
+@pytest.fixture(scope="session")
+def browser_context_args(browser_context_args):
+    return {
+        **browser_context_args,
+        "user_agent": (
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        ),
+        "viewport": {"width": 1280, "height": 720},
+    }
+
+
+# ---------------------------------------------------------------------------
+# Screenshot on failure — saves to screenshots/ for CI artifact upload
+# ---------------------------------------------------------------------------
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
+    if rep.when == "call" and rep.failed:
+        try:
+            page = (
+                item.funcargs.get("page")
+                or item.funcargs.get("user_page")
+                or item.funcargs.get("admin_page")
+            )
+            if page:
+                os.makedirs("screenshots", exist_ok=True)
+                safe = (
+                    item.nodeid
+                    .replace("/", "_")
+                    .replace("::", "__")
+                    .replace("[", "_")
+                    .replace("]", "")
+                )
+                page.screenshot(path=f"screenshots/{safe}.png", full_page=True)
+        except Exception:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -131,9 +189,9 @@ def admin_token() -> str:
 # ---------------------------------------------------------------------------
 
 @pytest.fixture
-def user_context(browser: Browser, user_token: str) -> BrowserContext:
+def user_context(browser: Browser, user_token: str, browser_context_args) -> BrowserContext:
     """Browser context with the customer JWT pre-loaded into localStorage."""
-    context = browser.new_context(base_url=BASE_URL)
+    context = browser.new_context(**browser_context_args, base_url=BASE_URL)
     context.add_init_script(
         f"window.localStorage.setItem('{AUTH_TOKEN_KEY}', '{user_token}')"
     )
@@ -142,9 +200,9 @@ def user_context(browser: Browser, user_token: str) -> BrowserContext:
 
 
 @pytest.fixture
-def admin_context(browser: Browser, admin_token: str) -> BrowserContext:
+def admin_context(browser: Browser, admin_token: str, browser_context_args) -> BrowserContext:
     """Browser context with the admin JWT pre-loaded into localStorage."""
-    context = browser.new_context(base_url=BASE_URL)
+    context = browser.new_context(**browser_context_args, base_url=BASE_URL)
     context.add_init_script(
         f"window.localStorage.setItem('{AUTH_TOKEN_KEY}', '{admin_token}')"
     )
