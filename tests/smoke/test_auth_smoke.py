@@ -37,8 +37,10 @@ def test_logout_clears_session(page: Page, session_user_email: str, session_user
     auth.login(session_user_email, session_user_password)
     page.wait_for_url(lambda url: "/auth/login" not in url, timeout=8_000)
 
-    # Sign out via nav
-    page.locator("[data-test='nav-menu']").click()
+    # Sign out via nav — wait for Angular to render authenticated nav before clicking
+    nav_menu = page.locator("[data-test='nav-menu']")
+    expect(nav_menu).to_be_visible(timeout=10_000)
+    nav_menu.click()
     page.locator("[data-test='nav-sign-out']").click()
 
     # Should return to unauthenticated state (login link visible)
