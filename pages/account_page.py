@@ -12,7 +12,7 @@ class AccountPage(BasePage):
         self.invoice_rows = page.locator("[data-test='invoice-row']")
 
     def open(self) -> "AccountPage":
-        self.page.goto(f"{BASE_URL}/account")
+        self.page.goto(f"{BASE_URL}/account", wait_until="networkidle")
         return self
 
     def go_to_orders(self) -> "AccountPage":

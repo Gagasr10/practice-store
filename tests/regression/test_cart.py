@@ -18,7 +18,7 @@ def test_add_multiple_products_to_cart(user_page: Page):
     ProductPage(user_page).add_to_cart()
     user_page.wait_for_load_state("networkidle")
 
-    user_page.goto(BASE_URL)
+    user_page.goto(BASE_URL, wait_until="networkidle")
     home.click_product(1)
     ProductPage(user_page).add_to_cart()
     user_page.wait_for_load_state("networkidle")

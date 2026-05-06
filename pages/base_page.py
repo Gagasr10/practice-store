@@ -6,7 +6,7 @@ class BasePage:
         self.page = page
 
     def navigate(self, path: str = "") -> None:
-        self.page.goto(path)
+        self.page.goto(path, wait_until="networkidle")
 
     def get_title(self) -> str:
         return self.page.title()

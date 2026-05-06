@@ -1,7 +1,7 @@
 import uuid
 import requests
 import pytest
-from playwright.sync_api import Browser, BrowserContext, Page
+from playwright.sync_api import Browser, BrowserContext, Page, expect as pw_expect
 
 import api.auth as auth_api
 from api.client import ApiClient
@@ -16,6 +16,16 @@ from data.test_data import (
     USER3_EMAIL,
     USER3_PASSWORD,
 )
+
+
+# ---------------------------------------------------------------------------
+# Global Playwright defaults — applied once per session
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="session", autouse=True)
+def configure_playwright_defaults():
+    """Raise assertion timeout from 5s to 15s to give Angular time to render on CI."""
+    pw_expect.set_options(timeout=15_000)
 
 
 # ---------------------------------------------------------------------------

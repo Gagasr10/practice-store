@@ -18,7 +18,7 @@ class HomePage(BasePage):
         )
 
     def open(self) -> "HomePage":
-        self.page.goto(BASE_URL)
+        self.page.goto(BASE_URL, wait_until="networkidle")
         return self
 
     def search(self, keyword: str) -> "HomePage":

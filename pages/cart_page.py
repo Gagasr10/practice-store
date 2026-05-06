@@ -11,7 +11,7 @@ class CartPage(BasePage):
         self.cart_total = page.locator("[data-test='cart-total']")
 
     def open(self) -> "CartPage":
-        self.page.goto(f"{BASE_URL}/checkout")
+        self.page.goto(f"{BASE_URL}/checkout", wait_until="networkidle")
         return self
 
     def get_item_count(self) -> int:
