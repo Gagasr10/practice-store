@@ -21,8 +21,11 @@ def test_full_checkout_cash_on_delivery(user_page: Page):
     product.add_to_cart()
     user_page.wait_for_load_state("networkidle")
 
-    # 2. Navigate to checkout and proceed past cart step
+    # 2. Navigate to checkout and proceed past cart step.
+    # Wait for networkidle after goto so the cart component's getCart() API call
+    # completes before asserting — proceed-1 is only rendered when cart_items.length > 0.
     user_page.goto(f"{BASE_URL}/checkout")
+    user_page.wait_for_load_state("networkidle", timeout=20_000)
     cart = CartPage(user_page)
     expect(cart.proceed_button).to_be_visible()
     cart.proceed_to_checkout()

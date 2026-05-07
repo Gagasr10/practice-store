@@ -37,7 +37,9 @@ def test_logout_clears_session(page: Page, session_user_email: str, session_user
     auth.login(session_user_email, session_user_password)
     page.wait_for_url(lambda url: "/auth/login" not in url, timeout=8_000)
 
-    # Sign out via nav — wait for Angular to render authenticated nav before clicking
+    # Wait for the auth HTTP call (getSignedInUser → /users/me) to resolve — this
+    # is what sets `name` and `role` in the header component, making nav-menu visible.
+    page.wait_for_load_state("networkidle", timeout=20_000)
     nav_menu = page.locator("[data-test='nav-menu']")
     expect(nav_menu).to_be_visible(timeout=10_000)
     nav_menu.click()
