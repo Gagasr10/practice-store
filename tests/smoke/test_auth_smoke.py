@@ -43,5 +43,7 @@ def test_logout_clears_session(user_page: Page):
     nav_menu.click()
     user_page.locator("[data-test='nav-sign-out']").click()
 
-    # After logout the sign-in link should be visible
-    expect(user_page.locator("[data-test='nav-sign-in']")).to_be_visible(timeout=10_000)
+    # After logout Angular removes nav-menu from the DOM (@if(name && role) → false).
+    # Don't assert nav-sign-in: the app redirects to /auth/login where that link is
+    # intentionally hidden (you are already on the sign-in page).
+    expect(user_page.locator("[data-test='nav-menu']")).to_be_hidden(timeout=10_000)

@@ -43,7 +43,14 @@ class CheckoutPage(BasePage):
 
     def proceed_from_address(self) -> None:
         from playwright.sync_api import expect
-        expect(self.proceed_address).to_be_enabled(timeout=8_000)
+        # The form triggers an async postcode lookup (postal_code + house_number →
+        # API). While the lookup is pending the form is invalid and proceed-3 is
+        # disabled even though all fields are filled. Wait for the loading indicator
+        # to disappear before asserting the button is enabled.
+        self.page.locator("[data-test='postcode-lookup-loading']").wait_for(
+            state="hidden", timeout=20_000
+        )
+        expect(self.proceed_address).to_be_enabled(timeout=15_000)
         self.proceed_address.click()
 
     def select_payment_method(self, method: str) -> None:
