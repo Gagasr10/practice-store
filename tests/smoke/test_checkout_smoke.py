@@ -21,14 +21,16 @@ def test_full_checkout_cash_on_delivery(user_page: Page):
     product.add_to_cart()
     user_page.wait_for_load_state("networkidle")
 
-    # 2. Navigate to checkout and proceed past cart step.
-    # proceed-1 is rendered by @if(cart.cart_items.length); the cart component
-    # fetches items via getCart() on init. The checkout page never reaches
-    # networkidle (persistent background connections), so use an explicit 30 s
-    # timeout to cover slow shared-API responses in CI.
-    user_page.goto(f"{BASE_URL}/checkout")
+    # 2. Navigate to checkout via the nav-cart link (SPA navigation).
+    # Avoid goto('/checkout') which causes a full-page reload: Angular re-bootstraps
+    # and the checkout route's auth guard can fire before the auth service has read
+    # the JWT from localStorage, redirecting back to login and leaving an empty cart.
+    # Clicking nav-cart is a client-side router navigation on an already-initialised
+    # Angular app, so auth state and sessionStorage cart_id are preserved.
+    user_page.locator("[data-test='nav-cart']").click()
+    user_page.wait_for_url("**/checkout**", timeout=10_000)
     cart = CartPage(user_page)
-    expect(cart.proceed_button).to_be_visible(timeout=30_000)
+    expect(cart.proceed_button).to_be_visible(timeout=20_000)
     cart.proceed_to_checkout()
 
     # 3. Sign-in step — authenticated users see their account info; click proceed-2 to advance

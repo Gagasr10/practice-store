@@ -5,7 +5,6 @@ from playwright.sync_api import Page, expect
 import api.auth as auth_api
 from data.test_data import BASE_URL
 from pages.auth_page import AuthPage
-from pages.home_page import HomePage
 
 
 @pytest.mark.smoke
@@ -30,20 +29,19 @@ def test_login_ui_success(page: Page, session_user_email: str, session_user_pass
 
 @pytest.mark.smoke
 @pytest.mark.ui
-def test_logout_clears_session(page: Page, session_user_email: str, session_user_password: str):
+def test_logout_clears_session(user_page: Page):
     """S09 — Logout redirects user and clears auth state."""
-    # Log in first
-    auth = AuthPage(page).open()
-    auth.login(session_user_email, session_user_password)
-    page.wait_for_url(lambda url: "/auth/login" not in url, timeout=8_000)
+    # Use the pre-authenticated user_page (JWT injected via add_init_script into
+    # localStorage before Angular bootstraps). Navigate to the unguarded home page
+    # so the auth service initialises before any route guard runs — avoids the
+    # race where goto('/account') triggers an auth-guard redirect back to login.
+    user_page.goto(BASE_URL)
 
-    # nav-menu is rendered by @if(name && role) in the header; `name` is set only
-    # after getSignedInUser() makes an HTTP call to /users/me. On the shared CI
-    # environment that call can take well over 10 s, so give it a full 30 s.
-    nav_menu = page.locator("[data-test='nav-menu']")
-    expect(nav_menu).to_be_visible(timeout=30_000)
+    # nav-menu appears after Angular's getSignedInUser() HTTP call sets name/role
+    nav_menu = user_page.locator("[data-test='nav-menu']")
+    expect(nav_menu).to_be_visible(timeout=20_000)
     nav_menu.click()
-    page.locator("[data-test='nav-sign-out']").click()
+    user_page.locator("[data-test='nav-sign-out']").click()
 
-    # Should return to unauthenticated state (login link visible)
-    expect(page.locator("[data-test='nav-sign-in']")).to_be_visible(timeout=6_000)
+    # After logout the sign-in link should be visible
+    expect(user_page.locator("[data-test='nav-sign-in']")).to_be_visible(timeout=10_000)
