@@ -22,12 +22,13 @@ def test_full_checkout_cash_on_delivery(user_page: Page):
     user_page.wait_for_load_state("networkidle")
 
     # 2. Navigate to checkout and proceed past cart step.
-    # Wait for networkidle after goto so the cart component's getCart() API call
-    # completes before asserting — proceed-1 is only rendered when cart_items.length > 0.
+    # proceed-1 is rendered by @if(cart.cart_items.length); the cart component
+    # fetches items via getCart() on init. The checkout page never reaches
+    # networkidle (persistent background connections), so use an explicit 30 s
+    # timeout to cover slow shared-API responses in CI.
     user_page.goto(f"{BASE_URL}/checkout")
-    user_page.wait_for_load_state("networkidle", timeout=20_000)
     cart = CartPage(user_page)
-    expect(cart.proceed_button).to_be_visible()
+    expect(cart.proceed_button).to_be_visible(timeout=30_000)
     cart.proceed_to_checkout()
 
     # 3. Sign-in step — authenticated users see their account info; click proceed-2 to advance

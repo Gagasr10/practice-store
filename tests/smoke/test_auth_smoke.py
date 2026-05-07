@@ -37,11 +37,11 @@ def test_logout_clears_session(page: Page, session_user_email: str, session_user
     auth.login(session_user_email, session_user_password)
     page.wait_for_url(lambda url: "/auth/login" not in url, timeout=8_000)
 
-    # Wait for the auth HTTP call (getSignedInUser → /users/me) to resolve — this
-    # is what sets `name` and `role` in the header component, making nav-menu visible.
-    page.wait_for_load_state("networkidle", timeout=20_000)
+    # nav-menu is rendered by @if(name && role) in the header; `name` is set only
+    # after getSignedInUser() makes an HTTP call to /users/me. On the shared CI
+    # environment that call can take well over 10 s, so give it a full 30 s.
     nav_menu = page.locator("[data-test='nav-menu']")
-    expect(nav_menu).to_be_visible(timeout=10_000)
+    expect(nav_menu).to_be_visible(timeout=30_000)
     nav_menu.click()
     page.locator("[data-test='nav-sign-out']").click()
 
