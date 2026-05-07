@@ -37,7 +37,7 @@ pytest tests/smoke/ -m smoke -v
 | Command | What runs |
 |---------|-----------|
 | `pytest tests/smoke/ -m smoke -v` | P0 smoke (10 tests, ~2 min) |
-| `pytest tests/regression/ -m regression -v` | P1 regression (54 tests, ~12 min) |
+| `pytest tests/regression/ -m regression -v` | P1 regression (55 tests, ~4 min) |
 | `pytest tests/edge/ -m edge -v` | P2 edge cases (12 tests, ~4 min) |
 | `pytest -v` | Everything |
 | `pytest tests/regression/ -m regression -v -n 4` | Regression in parallel (4 workers) |
@@ -156,7 +156,6 @@ pytest --base-url=https://staging.practicesoftwaretesting.com tests/smoke/ -m sm
 
 | Issue | Impact | Mitigation |
 |-------|--------|------------|
-| Checkout flaky in full-suite run | P1 intermittent | `--reruns 2` in CI |
 | `test_unauthenticated_user_redirected` occasionally slow | P1 intermittent | `--reruns 2` in CI |
 | Admin product edit — Angular doesn't pre-populate brand/category/stock | App bug | Tests fill all fields explicitly |
 | Invoice status: `COMPLETED → PENDING` returns 404 | App bug | Tests use valid transitions only |
