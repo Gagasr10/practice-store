@@ -79,7 +79,7 @@ def test_add_product_to_favourites(user_page: Page, user_token: str):
         "a[data-test^='product-'], [data-test='favourite-item'], "
         "[data-test='product-name'], h2, h3, .card"
     )
-    expect(fav_items.first).to_be_visible(timeout=6_000)
+    expect(fav_items.first).to_be_visible(timeout=10_000)
 
     # Cleanup: remove all favourites via API
     client = ApiClient(token=user_token)

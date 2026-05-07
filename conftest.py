@@ -165,8 +165,22 @@ def session_user_password(session_user_creds) -> str:
 # API auth fixtures (no browser, fast)
 # ---------------------------------------------------------------------------
 
+@pytest.fixture(scope="session")
+def session_user_token(session_user_creds) -> str:
+    """Session-scoped JWT reused by browser-context fixtures to avoid per-test login calls
+    that exhaust the shared server's rate limit."""
+    email, pwd = session_user_creds
+    if not email:
+        pytest.skip("User credentials unavailable in shared environment")
+    try:
+        return auth_api.login(email, pwd)["access_token"]
+    except Exception as exc:
+        pytest.skip(f"User login failed: {exc}")
+
+
 @pytest.fixture
 def user_token(session_user_creds) -> str:
+    """Function-scoped JWT for API-only tests that genuinely need a fresh token per call."""
     email, pwd = session_user_creds
     if not email:
         pytest.skip("User credentials unavailable in shared environment")
@@ -189,11 +203,11 @@ def admin_token() -> str:
 # ---------------------------------------------------------------------------
 
 @pytest.fixture
-def user_context(browser: Browser, user_token: str, browser_context_args) -> BrowserContext:
+def user_context(browser: Browser, session_user_token: str, browser_context_args) -> BrowserContext:
     """Browser context with the customer JWT pre-loaded into localStorage."""
     context = browser.new_context(**{**browser_context_args, "base_url": BASE_URL})
     context.add_init_script(
-        f"window.localStorage.setItem('{AUTH_TOKEN_KEY}', '{user_token}')"
+        f"window.localStorage.setItem('{AUTH_TOKEN_KEY}', '{session_user_token}')"
     )
     yield context
     context.close()

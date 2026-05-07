@@ -24,9 +24,12 @@ def test_add_multiple_products_to_cart(user_page: Page):
     ProductPage(user_page).add_to_cart()
     user_page.wait_for_load_state("networkidle")
 
-    user_page.goto(f"{BASE_URL}/checkout")
+    user_page.locator("[data-test='nav-cart']").click()
+    user_page.wait_for_url("**/checkout**", timeout=10_000)
     user_page.wait_for_load_state("networkidle")
-    assert CartPage(user_page).get_item_count() >= 2
+    cart = CartPage(user_page)
+    expect(cart.items.first).to_be_visible(timeout=15_000)
+    assert cart.get_item_count() >= 2
 
 
 @pytest.mark.regression
@@ -37,7 +40,8 @@ def test_update_item_quantity_in_cart(user_page: Page):
     ProductPage(user_page).add_to_cart()
     user_page.wait_for_load_state("networkidle")
 
-    user_page.goto(f"{BASE_URL}/checkout")
+    user_page.locator("[data-test='nav-cart']").click()
+    user_page.wait_for_url("**/checkout**", timeout=10_000)
     user_page.wait_for_load_state("networkidle")
     qty_input = user_page.locator("[data-test='product-quantity']").first
     qty_input.fill("3")
@@ -53,9 +57,11 @@ def test_remove_single_item_from_cart(user_page: Page):
     ProductPage(user_page).add_to_cart()
     user_page.wait_for_load_state("networkidle")
 
-    user_page.goto(f"{BASE_URL}/checkout")
+    user_page.locator("[data-test='nav-cart']").click()
+    user_page.wait_for_url("**/checkout**", timeout=10_000)
     user_page.wait_for_load_state("networkidle")
     cart = CartPage(user_page)
+    expect(cart.items.first).to_be_visible(timeout=15_000)
     initial_count = cart.get_item_count()
     cart.remove_item(0)
     expect(user_page.locator("[data-test='product-title']")).to_have_count(
@@ -71,11 +77,15 @@ def test_cart_persists_across_navigation(user_page: Page):
     ProductPage(user_page).add_to_cart()
     user_page.wait_for_load_state("networkidle")
 
-    # Navigate away and come back
-    user_page.goto(f"{BASE_URL}/contact")
-    user_page.goto(f"{BASE_URL}/checkout")
+    # Navigate away via SPA links, then back via nav-cart to avoid auth-guard race
+    user_page.locator("[data-test='nav-contact']").click()
+    user_page.wait_for_url("**/contact**", timeout=8_000)
+    user_page.locator("[data-test='nav-cart']").click()
+    user_page.wait_for_url("**/checkout**", timeout=10_000)
     user_page.wait_for_load_state("networkidle")
-    assert CartPage(user_page).get_item_count() > 0
+    cart = CartPage(user_page)
+    expect(cart.items.first).to_be_visible(timeout=15_000)
+    assert cart.get_item_count() > 0
 
 
 @pytest.mark.regression

@@ -15,7 +15,9 @@ class AdminDashboardPage(BasePage):
 
     def open(self) -> "AdminDashboardPage":
         self.page.goto(f"{BASE_URL}/admin")
-        self.page.wait_for_selector("[data-test='nav-admin-products']", state="visible", timeout=30_000)
+        # nav-admin-* links live inside the hamburger dropdown and are never visible
+        # until opened — wait for nav-menu (the toggle button) instead
+        self.page.wait_for_selector("[data-test='nav-menu']", state="visible", timeout=30_000)
         return self
 
     def go_to_products(self) -> None:

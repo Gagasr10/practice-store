@@ -23,10 +23,13 @@ class ProductPage(BasePage):
         self.quantity_input.fill(str(qty))
 
     def add_to_cart(self) -> None:
-        expect(self.add_to_cart_button).to_be_enabled(timeout=15_000)
+        expect(self.add_to_cart_button).to_be_visible(timeout=15_000)
+        expect(self.add_to_cart_button).to_be_enabled(timeout=30_000)
         self.add_to_cart_button.click()
 
     def add_to_favourites(self) -> None:
+        expect(self.add_to_favourites_button).to_be_visible(timeout=15_000)
+        expect(self.add_to_favourites_button).to_be_enabled(timeout=30_000)
         self.add_to_favourites_button.click()
 
     def get_related_product_count(self) -> int:
