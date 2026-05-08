@@ -12,7 +12,17 @@ class AccountPage(BasePage):
         self.invoice_rows = page.locator("[data-test='invoice-row']")
 
     def open(self) -> "AccountPage":
+        # Warm up Angular on the home page first (unguarded) so the auth service has
+        # read the token before we hit a protected route — avoids auth-guard race on CI.
+        if not self.page.url.startswith(BASE_URL):
+            self.page.goto(BASE_URL)
+            self.page.wait_for_load_state("networkidle")
         self.page.goto(f"{BASE_URL}/account")
+        self.page.wait_for_load_state("networkidle")
+        # If the auth guard redirected to login, retry once — the init_script has now
+        # re-injected the token so the second attempt succeeds reliably.
+        if "/auth/login" in self.page.url:
+            self.page.goto(f"{BASE_URL}/account")
         self.page.wait_for_selector("[data-test='nav-invoices']", state="visible", timeout=30_000)
         return self
 

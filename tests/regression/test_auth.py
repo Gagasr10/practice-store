@@ -67,6 +67,9 @@ def test_register_new_user_can_login(page: Page):
     auth = AuthPage(page).open_register()
     auth.register("Test", "Reg", unique_email, unique_pwd)
     page.wait_for_url(lambda url: "/auth/register" not in url, timeout=12_000)
+    # Registration auto-logs the user in; clear the session before opening the login
+    # page so Angular's logged-in guard doesn't redirect away from /auth/login.
+    page.evaluate("window.localStorage.clear()")
     auth.open()
     auth.login(unique_email, unique_pwd)
     page.wait_for_url(lambda url: "/auth/login" not in url, timeout=8_000)
@@ -110,7 +113,7 @@ def test_register_weak_password_shows_error(page: Page):
 
 @pytest.mark.regression
 @pytest.mark.ui
-def test_change_password_authenticated(browser):
+def test_change_password_authenticated(browser, browser_context_args):
     # Register a throwaway user so shared accounts are not affected
     client = ApiClient()
     throwaway_email = f"chpwd_{uuid.uuid4().hex[:8]}@example.com"
@@ -126,7 +129,7 @@ def test_change_password_authenticated(browser):
     token = auth_api.login(throwaway_email, throwaway_old)["access_token"]
 
     from data.test_data import AUTH_TOKEN_KEY
-    ctx = browser.new_context(base_url=BASE_URL)
+    ctx = browser.new_context(**{**browser_context_args, "base_url": BASE_URL})
     ctx.add_init_script(f"window.localStorage.setItem('{AUTH_TOKEN_KEY}', '{token}')")
     page = ctx.new_page()
     try:

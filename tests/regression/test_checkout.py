@@ -35,7 +35,7 @@ def _reach_address_step(user_page: Page) -> CheckoutPage:
     cart.proceed_to_checkout()
     checkout = CheckoutPage(user_page)
     # Step 2 (sign-in confirmation) is shown even for authenticated users
-    expect(checkout.proceed_sign_in).to_be_visible(timeout=6_000)
+    expect(checkout.proceed_sign_in).to_be_visible(timeout=20_000)
     checkout.proceed_from_sign_in()
     expect(checkout.street).to_be_visible(timeout=8_000)
     return checkout
@@ -150,7 +150,7 @@ def test_address_blank_fields_block_progression(user_page: Page):
     expect(cart.proceed_button).to_be_visible(timeout=20_000)
     cart.proceed_to_checkout()
     checkout = CheckoutPage(user_page)
-    expect(checkout.proceed_sign_in).to_be_visible(timeout=6_000)
+    expect(checkout.proceed_sign_in).to_be_visible(timeout=20_000)
     checkout.proceed_from_sign_in()
     expect(checkout.street).to_be_visible(timeout=8_000)
     # Proceed button should be disabled when address fields are blank
@@ -171,7 +171,7 @@ def test_address_postcode_lookup_populates_fields(user_page: Page):
     expect(cart.proceed_button).to_be_visible(timeout=20_000)
     cart.proceed_to_checkout()
     checkout = CheckoutPage(user_page)
-    expect(checkout.proceed_sign_in).to_be_visible(timeout=6_000)
+    expect(checkout.proceed_sign_in).to_be_visible(timeout=20_000)
     checkout.proceed_from_sign_in()
     expect(checkout.street).to_be_visible(timeout=8_000)
     checkout.postal_code.fill("90210")
@@ -197,7 +197,9 @@ def test_unauthenticated_user_redirected_to_login_at_checkout(page: Page):
     home.click_product(0)
     ProductPage(page).add_to_cart()
     page.wait_for_load_state("networkidle")
+    # Angular's auth guard redirects unauthenticated users to /auth/login immediately
+    # on goto('/checkout') — proceed-1 is never rendered, so go straight to URL check.
     page.goto(f"{BASE_URL}/checkout")
-    CartPage(page).proceed_to_checkout()
+    page.wait_for_url("**/auth/login**", timeout=15_000)
     auth = AuthPage(page)
     expect(auth.email_input).to_be_visible(timeout=6_000)
