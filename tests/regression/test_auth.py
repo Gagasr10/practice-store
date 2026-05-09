@@ -133,7 +133,12 @@ def test_change_password_authenticated(browser, browser_context_args):
     ctx.add_init_script(f"window.localStorage.setItem('{AUTH_TOKEN_KEY}', '{token}')")
     page = ctx.new_page()
     try:
+        page.goto(BASE_URL)
+        page.wait_for_load_state("networkidle")
         page.goto(f"{BASE_URL}/account")
+        page.wait_for_load_state("networkidle")
+        if "/auth/login" in page.url:
+            page.goto(f"{BASE_URL}/account")
         page.wait_for_selector("[data-test='nav-profile']", state="visible", timeout=30_000)
         page.locator("[data-test='nav-profile']").click()
         page.wait_for_load_state("networkidle")
