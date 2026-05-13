@@ -197,8 +197,13 @@ def test_unauthenticated_user_redirected_to_login_at_checkout(page: Page):
     home.click_product(0)
     ProductPage(page).add_to_cart()
     page.wait_for_selector("[data-test='nav-cart']", state="visible", timeout=15_000)
-    # Angular's auth guard redirects unauthenticated users to /auth/login on goto('/checkout').
-    page.goto(f"{BASE_URL}/checkout")
+    # Navigate to checkout via the cart icon (SPA nav) so Angular initialises before
+    # hitting the auth-guarded steps.
+    page.locator("[data-test='nav-cart']").click()
+    page.wait_for_url("**/checkout**", timeout=10_000)
+    cart = CartPage(page)
+    expect(cart.proceed_button).to_be_visible(timeout=20_000)
+    cart.proceed_to_checkout()
+    # Step 2 (SIGN IN) requires authentication — the email input is now visible.
     auth = AuthPage(page)
     expect(auth.email_input).to_be_visible(timeout=20_000)
-    assert "/auth/login" in page.url

@@ -146,12 +146,22 @@ def test_change_password_authenticated(browser, browser_context_args):
         page.wait_for_selector("[data-test='nav-profile']", state="visible", timeout=30_000)
         page.locator("[data-test='nav-profile']").click()
         page.wait_for_selector("[data-test='current-password']", state="visible", timeout=30_000)
-        page.locator("[data-test='current-password']").fill(throwaway_old)
-        page.locator("[data-test='new-password']").fill(throwaway_new)
-        page.locator("[data-test='new-password-confirm']").fill(throwaway_new)
-        page.locator("[data-test='change-password-submit']").click()
-        success = page.locator(".toast-success, [data-test='toast-success']")
-        expect(success.first).to_be_visible(timeout=20_000)
+        # press_sequentially fires per-keystroke events that Angular's ControlValueAccessor
+        # requires — fill() only fires a single bulk input event which Angular's reactive
+        # form ignores for form-validity checks in this component.
+        page.locator("[data-test='current-password']").press_sequentially(throwaway_old, delay=30)
+        page.locator("[data-test='new-password']").press_sequentially(throwaway_new, delay=30)
+        page.locator("[data-test='new-password-confirm']").press_sequentially(throwaway_new, delay=30)
+        submit_btn = page.locator("[data-test='change-password-submit']")
+        expect(submit_btn).to_be_enabled(timeout=10_000)
+        with page.expect_response(
+            lambda r: "users" in r.url and r.request.method in ("POST", "PUT", "PATCH"),
+            timeout=15_000,
+        ) as pw_resp:
+            submit_btn.click()
+        assert pw_resp.value.status in (200, 201), (
+            f"Password change API returned {pw_resp.value.status}: {pw_resp.value.text()[:200]}"
+        )
     finally:
         page.close()
         ctx.close()
