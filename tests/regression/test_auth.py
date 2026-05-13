@@ -134,14 +134,18 @@ def test_change_password_authenticated(browser, browser_context_args):
     page = ctx.new_page()
     try:
         page.goto(BASE_URL)
-        page.wait_for_load_state("networkidle")
+        page.wait_for_selector("a[data-test^='product-']", state="visible", timeout=30_000)
         page.goto(f"{BASE_URL}/account")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_selector(
+            "[data-test='nav-invoices'], [data-test='email']",
+            state="visible",
+            timeout=30_000,
+        )
         if "/auth/login" in page.url:
             page.goto(f"{BASE_URL}/account")
         page.wait_for_selector("[data-test='nav-profile']", state="visible", timeout=30_000)
         page.locator("[data-test='nav-profile']").click()
-        page.wait_for_load_state("networkidle")
+        page.wait_for_selector("[data-test='current-password']", state="visible", timeout=30_000)
         page.locator("[data-test='current-password']").fill(throwaway_old)
         page.locator("[data-test='new-password']").fill(throwaway_new)
         page.locator("[data-test='new-password-confirm']").fill(throwaway_new)
