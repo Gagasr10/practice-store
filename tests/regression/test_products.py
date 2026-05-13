@@ -25,12 +25,10 @@ def test_filter_products_by_category(page: Page):
 @pytest.mark.ui
 def test_filter_products_by_brand(page: Page):
     home = HomePage(page).open()
-    page.wait_for_load_state("networkidle")
-    brand_filter = page.locator("[data-test='brand'], [data-test='brand-filter']").first
-    if not brand_filter.is_visible():
-        pytest.skip("Brand filter not visible on homepage — verify selector")
+    brand_filter = page.locator("[data-test^='brand-']").first
+    expect(brand_filter).to_be_visible(timeout=10_000)
     brand_filter.click()
-    page.wait_for_load_state("networkidle")
+    page.wait_for_selector("a[data-test^='product-']", state="visible", timeout=15_000)
     assert home.get_product_count() > 0
 
 

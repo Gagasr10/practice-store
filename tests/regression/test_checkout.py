@@ -174,20 +174,15 @@ def test_address_postcode_lookup_populates_fields(user_page: Page):
     expect(checkout.proceed_sign_in).to_be_visible(timeout=20_000)
     checkout.proceed_from_sign_in()
     expect(checkout.street).to_be_visible(timeout=8_000)
-    checkout.postal_code.fill("90210")
-    # Click a lookup button if present
-    lookup_btn = user_page.locator(
-        "[data-test='lookup-postcode'], [data-test='postcode-lookup'], button:has-text('Lookup')"
-    )
-    if lookup_btn.is_visible():
-        lookup_btn.click()
-        user_page.wait_for_selector("[data-test='postcode-lookup-loading']", state="hidden", timeout=20_000)
-        # After lookup, city or state should be populated
-        city_value = checkout.city.input_value()
-        state_value = checkout.state.input_value()
-        assert city_value or state_value, "Postcode lookup did not populate address fields"
-    else:
-        pytest.skip("Postcode lookup button not found — verify selector")
+    # Lookup is automatic: fill country + postal_code + house_number and the app
+    # calls the postcode API in the background (no button needed).
+    checkout.country.select_option("US")
+    checkout.postal_code.fill("12345")
+    checkout.house_number.fill("123")
+    user_page.wait_for_selector("[data-test='postcode-lookup-loading']", state="hidden", timeout=20_000)
+    city_value = checkout.city.input_value()
+    state_value = checkout.state.input_value()
+    assert city_value or state_value, "Postcode lookup did not populate address fields"
 
 
 @pytest.mark.regression

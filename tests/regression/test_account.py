@@ -102,7 +102,7 @@ def test_remove_product_from_favourites(user_page: Page, user_token: str):
 
     account = AccountPage(user_page).open()
     account.go_to_favourites()
-    user_page.wait_for_load_state("networkidle")
+    user_page.wait_for_selector("[data-test^='favorite-']", state="visible", timeout=15_000)
 
     # Look broadly for favourite items using API count as ground truth
     fav_resp = client.get("/favorites")
@@ -110,13 +110,10 @@ def test_remove_product_from_favourites(user_page: Page, user_token: str):
     fav_list = favs if isinstance(favs, list) else favs.get("data", [])
     assert len(fav_list) > 0, "No favourites found after adding via API"
 
-    remove_btn = user_page.locator(
-        "[data-test='remove-from-favorites'], [data-test='add-to-favorites']"
-    ).first
-    if not remove_btn.is_visible():
-        pytest.skip("Remove from favourites button not found — verify page selectors")
+    remove_btn = user_page.locator("[data-test='delete']").first
+    expect(remove_btn).to_be_visible(timeout=10_000)
     remove_btn.click()
-    user_page.wait_for_load_state("networkidle")
+    user_page.wait_for_selector("[data-test='delete']", state="hidden", timeout=10_000)
 
     # Verify via API that the favourite count decreased
     fav_resp2 = client.get("/favorites")
