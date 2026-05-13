@@ -19,7 +19,7 @@ def test_full_checkout_cash_on_delivery(user_page: Page):
     product = ProductPage(user_page)
     expect(product.add_to_cart_button).to_be_visible()
     product.add_to_cart()
-    user_page.wait_for_load_state("networkidle")
+    user_page.wait_for_selector("[data-test='nav-cart']", state="visible", timeout=15_000)
 
     # 2. Navigate to checkout via the nav-cart link (SPA navigation).
     # Avoid goto('/checkout') which causes a full-page reload: Angular re-bootstraps

@@ -20,4 +20,3 @@ def test_add_product_to_cart(page: Page):
     # Cart badge / icon should reflect 1 item
     cart_indicator = page.locator("[data-test='nav-cart']")
     expect(cart_indicator).to_be_visible()
-    page.wait_for_load_state("networkidle")

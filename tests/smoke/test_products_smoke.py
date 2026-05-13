@@ -35,6 +35,6 @@ def test_search_returns_matching_products(page: Page):
     """S06 — Searching 'Hammer' returns relevant results."""
     home = HomePage(page).open()
     home.search("Hammer")
-    page.wait_for_load_state("networkidle")
+    page.wait_for_selector("a[data-test^='product-']", state="visible", timeout=15_000)
     count = home.get_product_count()
     assert count > 0, "Search for 'Hammer' returned no products"
