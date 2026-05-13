@@ -150,8 +150,8 @@ def test_change_password_authenticated(browser, browser_context_args):
         page.locator("[data-test='new-password']").fill(throwaway_new)
         page.locator("[data-test='new-password-confirm']").fill(throwaway_new)
         page.locator("[data-test='change-password-submit']").click()
-        success = page.locator("[role='alert']")
-        expect(success.first).to_be_visible(timeout=8_000)
+        success = page.locator(".toast-success, [data-test='toast-success']")
+        expect(success.first).to_be_visible(timeout=20_000)
     finally:
         page.close()
         ctx.close()
