@@ -25,7 +25,7 @@ def _reach_address_step(user_page: Page) -> CheckoutPage:
     home = HomePage(user_page).open()
     home.click_product(0)
     ProductPage(user_page).add_to_cart()
-    user_page.wait_for_load_state("networkidle")
+    user_page.wait_for_selector("[data-test='nav-cart']", state="visible", timeout=15_000)
     # SPA navigation avoids auth-guard race: goto('/checkout') causes a full-page
     # reload where Angular's auth guard fires before the auth service reads the JWT.
     user_page.locator("[data-test='nav-cart']").click()
@@ -143,7 +143,7 @@ def test_address_blank_fields_block_progression(user_page: Page):
     home = HomePage(user_page).open()
     home.click_product(0)
     ProductPage(user_page).add_to_cart()
-    user_page.wait_for_load_state("networkidle")
+    user_page.wait_for_selector("[data-test='nav-cart']", state="visible", timeout=15_000)
     user_page.locator("[data-test='nav-cart']").click()
     user_page.wait_for_url("**/checkout**", timeout=10_000)
     cart = CartPage(user_page)
@@ -164,7 +164,7 @@ def test_address_postcode_lookup_populates_fields(user_page: Page):
     home = HomePage(user_page).open()
     home.click_product(0)
     ProductPage(user_page).add_to_cart()
-    user_page.wait_for_load_state("networkidle")
+    user_page.wait_for_selector("[data-test='nav-cart']", state="visible", timeout=15_000)
     user_page.locator("[data-test='nav-cart']").click()
     user_page.wait_for_url("**/checkout**", timeout=10_000)
     cart = CartPage(user_page)
@@ -181,7 +181,7 @@ def test_address_postcode_lookup_populates_fields(user_page: Page):
     )
     if lookup_btn.is_visible():
         lookup_btn.click()
-        user_page.wait_for_load_state("networkidle")
+        user_page.wait_for_selector("[data-test='postcode-lookup-loading']", state="hidden", timeout=20_000)
         # After lookup, city or state should be populated
         city_value = checkout.city.input_value()
         state_value = checkout.state.input_value()
