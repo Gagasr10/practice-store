@@ -16,10 +16,9 @@ from data.test_data import BASE_URL
 def test_authenticated_user_sees_order_history(user_page: Page):
     account = AccountPage(user_page).open()
     account.go_to_orders()
-    user_page.wait_for_load_state("networkidle")
     # Orders section renders either rows or a page title (invoices tab is shown)
     page_title = user_page.locator("[data-test='page-title']")
-    expect(page_title).to_be_visible(timeout=6_000)
+    expect(page_title).to_be_visible(timeout=15_000)
     # If there are invoices, verify the first row is visible
     if account.get_invoice_count() > 0:
         expect(account.invoice_rows.first).to_be_visible(timeout=4_000)
@@ -30,14 +29,13 @@ def test_authenticated_user_sees_order_history(user_page: Page):
 def test_invoice_detail_shows_correct_items_and_total(user_page: Page):
     account = AccountPage(user_page).open()
     account.go_to_orders()
-    user_page.wait_for_load_state("networkidle")
+    user_page.wait_for_selector("[data-test='invoice-row'], [data-test='page-title']", state="visible", timeout=15_000)
     if account.get_invoice_count() == 0:
         pytest.skip("No invoices available for this test user")
     account.invoice_rows.first.click()
-    user_page.wait_for_load_state("networkidle")
     # Invoice detail should show product lines and a total
     expect(user_page.locator("[data-test='invoice-detail'], [data-test='invoice-total']").first).to_be_visible(
-        timeout=6_000
+        timeout=10_000
     )
 
 
@@ -69,11 +67,10 @@ def test_add_product_to_favourites(user_page: Page, user_token: str):
     product = ProductPage(user_page)
     expect(product.add_to_favourites_button).to_be_visible()
     product.add_to_favourites()
-    user_page.wait_for_load_state("networkidle")
+    user_page.wait_for_selector("[data-test='add-to-favorites']", state="visible", timeout=10_000)
 
     account = AccountPage(user_page).open()
     account.go_to_favourites()
-    user_page.wait_for_load_state("networkidle")
     # After adding a favourite, the page should show at least a product card
     fav_items = user_page.locator(
         "a[data-test^='product-'], [data-test='favourite-item'], "

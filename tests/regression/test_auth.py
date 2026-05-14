@@ -67,9 +67,12 @@ def test_register_new_user_can_login(page: Page):
     auth = AuthPage(page).open_register()
     auth.register("Test", "Reg", unique_email, unique_pwd)
     page.wait_for_url(lambda url: "/auth/register" not in url, timeout=12_000)
-    # Registration auto-logs the user in; clear the session before opening the login
-    # page so Angular's logged-in guard doesn't redirect away from /auth/login.
+    # Registration auto-logs the user in; clear the session and reload to flush
+    # Angular's in-memory auth state before navigating to /auth/login — without the
+    # reload the logged-in route guard fires on the stale in-memory state and
+    # redirects away from the login page even though localStorage is empty.
     page.evaluate("window.localStorage.clear()")
+    page.reload()
     auth.open()
     auth.login(unique_email, unique_pwd)
     page.wait_for_url(lambda url: "/auth/login" not in url, timeout=8_000)

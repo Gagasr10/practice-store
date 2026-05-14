@@ -12,23 +12,23 @@ class AccountPage(BasePage):
         self.invoice_rows = page.locator("[data-test='invoice-row']")
 
     def open(self) -> "AccountPage":
-        # Warm up Angular on the home page first (unguarded) so the auth service has
-        # read the token before we hit a protected route — avoids auth-guard race on CI.
-        # Use an element wait instead of networkidle; the SPA never reaches networkidle on CI.
-        if not self.page.url.startswith(BASE_URL):
-            self.page.goto(BASE_URL)
-            self.page.wait_for_selector("a[data-test^='product-']", state="visible", timeout=30_000)
+        # Always warm up Angular on the home page first so the auth service has read
+        # the token before hitting the protected /account route.
+        self.page.goto(BASE_URL)
+        self.page.wait_for_selector("a[data-test^='product-']", state="visible", timeout=30_000)
         self.page.goto(f"{BASE_URL}/account")
-        # Wait for Angular to finish routing — either the account page renders nav-invoices
-        # or the auth guard redirects and the login form appears.
+        # Wait for Angular to finish routing. nav-invoices is the account nav tab;
+        # nav-menu is the authenticated-user dropdown in the main nav (appears as soon
+        # as the auth service resolves, before account data finishes loading);
+        # email is shown if the auth guard redirects to the login page.
         self.page.wait_for_selector(
-            "[data-test='nav-invoices'], [data-test='email']",
+            "[data-test='nav-invoices'], [data-test='nav-menu'], [data-test='email']",
             state="visible",
             timeout=30_000,
         )
         if "/auth/login" in self.page.url:
             self.page.goto(f"{BASE_URL}/account")
-        self.page.wait_for_selector("[data-test='nav-invoices']", state="visible", timeout=30_000)
+            self.page.wait_for_selector("[data-test='nav-invoices']", state="visible", timeout=30_000)
         return self
 
     def go_to_orders(self) -> "AccountPage":
