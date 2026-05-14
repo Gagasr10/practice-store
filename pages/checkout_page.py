@@ -34,12 +34,14 @@ class CheckoutPage(BasePage):
         self.proceed_sign_in.click()
 
     def fill_address(self, address: dict) -> None:
-        self.street.fill(address["street"])
-        self.house_number.fill(address["house_number"])
-        self.city.fill(address["city"])
-        self.state.fill(address["state"])
+        # country/postal_code/house_number are visible; the postcode API auto-populates
+        # street/city/state (hidden inputs). force=True bypasses the visibility check.
         self.country.select_option(address["country"])
         self.postal_code.fill(address["postal_code"])
+        self.house_number.fill(address["house_number"])
+        self.street.fill(address["street"], force=True)
+        self.city.fill(address["city"], force=True)
+        self.state.fill(address["state"], force=True)
 
     def proceed_from_address(self) -> None:
         from playwright.sync_api import expect
