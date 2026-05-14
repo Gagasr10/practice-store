@@ -17,25 +17,30 @@ class AccountPage(BasePage):
         self.page.goto(BASE_URL)
         self.page.wait_for_selector("a[data-test^='product-']", state="visible", timeout=30_000)
         self.page.goto(f"{BASE_URL}/account")
-        # Wait for Angular to finish routing. nav-invoices is the account nav tab;
-        # nav-menu is the authenticated-user dropdown in the main nav (appears as soon
-        # as the auth service resolves, before account data finishes loading);
-        # email is shown if the auth guard redirects to the login page.
+        # nav-menu is the authenticated-user dropdown in the main nav — it appears as
+        # soon as Angular's auth service resolves and is always visible on every page.
+        # Account-section links (nav-invoices, nav-favorites, nav-profile) are inside
+        # this dropdown and are NOT directly visible until the dropdown is opened.
+        # email appears if the auth guard redirects to the login page instead.
         self.page.wait_for_selector(
-            "[data-test='nav-invoices'], [data-test='nav-menu'], [data-test='email']",
+            "[data-test='nav-menu'], [data-test='email']",
             state="visible",
             timeout=30_000,
         )
         if "/auth/login" in self.page.url:
             self.page.goto(f"{BASE_URL}/account")
-            self.page.wait_for_selector("[data-test='nav-invoices']", state="visible", timeout=30_000)
+            self.page.wait_for_selector("[data-test='nav-menu']", state="visible", timeout=30_000)
         return self
 
     def go_to_orders(self) -> "AccountPage":
+        # nav-invoices lives inside the nav-menu dropdown — open it first
+        self.page.locator("[data-test='nav-menu']").click()
         self.invoices_tab.click()
         return self
 
     def go_to_favourites(self) -> "AccountPage":
+        # nav-favorites lives inside the nav-menu dropdown — open it first
+        self.page.locator("[data-test='nav-menu']").click()
         self.favourites_tab.click()
         return self
 

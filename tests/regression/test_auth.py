@@ -139,14 +139,19 @@ def test_change_password_authenticated(browser, browser_context_args):
         page.goto(BASE_URL)
         page.wait_for_selector("a[data-test^='product-']", state="visible", timeout=30_000)
         page.goto(f"{BASE_URL}/account")
+        # nav-menu is the authenticated-user dropdown; account section links live inside
+        # it and are not directly visible until the dropdown is opened.
         page.wait_for_selector(
-            "[data-test='nav-invoices'], [data-test='email']",
+            "[data-test='nav-menu'], [data-test='email']",
             state="visible",
             timeout=30_000,
         )
         if "/auth/login" in page.url:
             page.goto(f"{BASE_URL}/account")
-        page.wait_for_selector("[data-test='nav-profile']", state="visible", timeout=30_000)
+            page.wait_for_selector("[data-test='nav-menu']", state="visible", timeout=30_000)
+        # Open the nav-menu dropdown then navigate to the profile section
+        page.locator("[data-test='nav-menu']").click()
+        page.wait_for_selector("[data-test='nav-profile']", state="visible", timeout=10_000)
         page.locator("[data-test='nav-profile']").click()
         page.wait_for_selector("[data-test='current-password']", state="visible", timeout=30_000)
         # press_sequentially fires per-keystroke events that Angular's ControlValueAccessor
