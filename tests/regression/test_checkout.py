@@ -40,11 +40,11 @@ def _reach_address_step(user_page: Page) -> CheckoutPage:
     user_page.wait_for_selector(
         "[data-test='proceed-2'], [data-test='country']",
         state="visible",
-        timeout=15_000,
+        timeout=30_000,
     )
     if checkout.proceed_sign_in.is_visible():
         checkout.proceed_from_sign_in()
-    expect(checkout.country).to_be_visible(timeout=15_000)
+    expect(checkout.country).to_be_visible(timeout=30_000)
     return checkout
 
 
@@ -160,11 +160,11 @@ def test_address_blank_fields_block_progression(user_page: Page):
     user_page.wait_for_selector(
         "[data-test='proceed-2'], [data-test='country']",
         state="visible",
-        timeout=15_000,
+        timeout=30_000,
     )
     if checkout.proceed_sign_in.is_visible():
         checkout.proceed_from_sign_in()
-    expect(checkout.country).to_be_visible(timeout=15_000)
+    expect(checkout.country).to_be_visible(timeout=30_000)
     # Proceed button should be disabled when address fields are blank
     proceed_btn = user_page.locator("[data-test='proceed-3']")
     expect(proceed_btn).to_be_disabled(timeout=4_000)
@@ -186,11 +186,11 @@ def test_address_postcode_lookup_populates_fields(user_page: Page):
     user_page.wait_for_selector(
         "[data-test='proceed-2'], [data-test='country']",
         state="visible",
-        timeout=15_000,
+        timeout=30_000,
     )
     if checkout.proceed_sign_in.is_visible():
         checkout.proceed_from_sign_in()
-    expect(checkout.country).to_be_visible(timeout=15_000)
+    expect(checkout.country).to_be_visible(timeout=30_000)
     # Lookup is automatic: fill country + postal_code + house_number and the app
     # calls the postcode API in the background (no button needed).
     checkout.country.select_option("US")

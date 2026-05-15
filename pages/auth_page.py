@@ -29,7 +29,7 @@ class AuthPage(BasePage):
 
     def open(self) -> "AuthPage":
         self.page.goto(f"{BASE_URL}/auth/login", wait_until="domcontentloaded")
-        self.page.wait_for_selector("[data-test='email']", state="visible", timeout=30_000)
+        self.page.wait_for_selector("[data-test='email']", state="visible", timeout=60_000)
         return self
 
     def login(self, email: str, password: str) -> None:
@@ -39,7 +39,7 @@ class AuthPage(BasePage):
 
     def open_register(self) -> "AuthPage":
         self.page.goto(f"{BASE_URL}/auth/register", wait_until="domcontentloaded")
-        self.page.wait_for_selector("[data-test='first-name']", state="visible", timeout=30_000)
+        self.page.wait_for_selector("[data-test='first-name']", state="visible", timeout=60_000)
         return self
 
     def register(

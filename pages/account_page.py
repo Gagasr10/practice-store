@@ -12,15 +12,14 @@ class AccountPage(BasePage):
         self.invoice_rows = page.locator("[data-test='invoice-row']")
 
     def open(self) -> "AccountPage":
-        # Navigate to the unguarded home page first so Angular's auth service resolves
-        # (getSignedInUser() HTTP call completes) before the protected /account route
-        # triggers its auth guard — avoids a redirect-to-login race on slow CI runners.
-        self.page.goto(BASE_URL)
-        # nav-menu appears only after getSignedInUser() resolves; waiting for it here
-        # guarantees auth state is ready before we hit the guarded route.
-        self.page.wait_for_selector("[data-test='nav-menu']", state="visible", timeout=30_000)
-        self.page.goto(f"{BASE_URL}/account")
-        self.page.wait_for_selector("[data-test='nav-menu']", state="visible", timeout=30_000)
+        # Land on the unguarded home page so Angular's auth service resolves
+        # (getSignedInUser() completes) without triggering the /account route guard.
+        # All callers follow open() with go_to_orders() or go_to_favourites(), which
+        # do SPA navigation via the nav-menu dropdown — no second full page load needed.
+        self.page.goto(BASE_URL, wait_until="domcontentloaded")
+        # nav-menu appears only after getSignedInUser() resolves. 60s budget covers
+        # slow CI runners hitting the external API.
+        self.page.wait_for_selector("[data-test='nav-menu']", state="visible", timeout=60_000)
         return self
 
     def go_to_orders(self) -> "AccountPage":
