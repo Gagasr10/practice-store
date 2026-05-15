@@ -2,14 +2,14 @@ name: Regression Tests
 
 on:
   schedule:
-    - cron: "0 2 * * *"   # 02:00 UTC nightly
+    - cron: "0 3 * * *"
   pull_request:
     branches: [main]
   workflow_dispatch:
 
 concurrency:
   group: regression-${{ github.ref }}
-  cancel-in-progress: false   # let nightly runs finish even if a new one queues
+  cancel-in-progress: false
 
 jobs:
   regression:
