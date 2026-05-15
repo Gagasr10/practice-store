@@ -33,9 +33,12 @@ def test_full_checkout_cash_on_delivery(user_page: Page):
     expect(cart.proceed_button).to_be_visible(timeout=20_000)
     cart.proceed_to_checkout()
 
-    # 3. Billing address — authenticated users auto-advance past step 2 (sign-in)
+    # 3. Step 2 (sign-in): authenticated users still land here — click Proceed
     checkout = CheckoutPage(user_page)
-    expect(checkout.country).to_be_visible(timeout=20_000)
+    expect(checkout.proceed_sign_in).to_be_visible(timeout=15_000)
+    checkout.proceed_from_sign_in()
+    # 4. Billing address (step 3)
+    expect(checkout.country).to_be_visible(timeout=15_000)
     checkout.fill_address(DEFAULT_ADDRESS)
     checkout.proceed_from_address()
 
