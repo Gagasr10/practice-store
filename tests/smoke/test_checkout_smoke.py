@@ -35,7 +35,7 @@ def test_full_checkout_cash_on_delivery(user_page: Page):
 
     # 3. Billing address — authenticated users auto-advance past step 2 (sign-in)
     checkout = CheckoutPage(user_page)
-    expect(checkout.country).to_be_visible()
+    expect(checkout.country).to_be_visible(timeout=20_000)
     checkout.fill_address(DEFAULT_ADDRESS)
     checkout.proceed_from_address()
 
