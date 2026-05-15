@@ -36,10 +36,11 @@ def test_filter_products_by_brand(page: Page):
 @pytest.mark.ui
 def test_sort_products_price_ascending(page: Page):
     home = HomePage(page).open()
-    page.wait_for_load_state("networkidle")
-    home.sort_select.select_option("price,asc")
-    page.wait_for_load_state("networkidle")
-    page.wait_for_timeout(800)
+    with page.expect_response(
+        lambda r: "/products" in r.url and r.status == 200, timeout=15_000
+    ):
+        home.sort_select.select_option("price,asc")
+    expect(page.locator("[data-test='product-price']").first).to_be_visible(timeout=10_000)
     prices = []
     for el in page.locator("[data-test='product-price']").all():
         text = el.inner_text().replace("$", "").strip()
@@ -56,10 +57,11 @@ def test_sort_products_price_ascending(page: Page):
 @pytest.mark.ui
 def test_sort_products_price_descending(page: Page):
     home = HomePage(page).open()
-    page.wait_for_load_state("networkidle")
-    home.sort_select.select_option("price,desc")
-    page.wait_for_load_state("networkidle")
-    page.wait_for_timeout(800)
+    with page.expect_response(
+        lambda r: "/products" in r.url and r.status == 200, timeout=15_000
+    ):
+        home.sort_select.select_option("price,desc")
+    expect(page.locator("[data-test='product-price']").first).to_be_visible(timeout=10_000)
     prices = []
     for el in page.locator("[data-test='product-price']").all():
         text = el.inner_text().replace("$", "").strip()

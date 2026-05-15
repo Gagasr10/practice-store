@@ -15,18 +15,21 @@ from data.test_data import BASE_URL
 def test_add_multiple_products_to_cart(user_page: Page):
     home = HomePage(user_page).open()
     home.click_product(0)
-    ProductPage(user_page).add_to_cart()
-    user_page.wait_for_load_state("networkidle")
+    with user_page.expect_response(
+        lambda r: "/carts" in r.url and r.request.method == "POST", timeout=15_000
+    ):
+        ProductPage(user_page).add_to_cart()
 
     user_page.goto(BASE_URL)
     user_page.wait_for_selector("a[data-test^='product-']", state="visible", timeout=30_000)
     home.click_product(1)
-    ProductPage(user_page).add_to_cart()
-    user_page.wait_for_load_state("networkidle")
+    with user_page.expect_response(
+        lambda r: "/carts" in r.url and r.request.method == "POST", timeout=15_000
+    ):
+        ProductPage(user_page).add_to_cart()
 
     user_page.locator("[data-test='nav-cart']").click()
     user_page.wait_for_url("**/checkout**", timeout=10_000)
-    user_page.wait_for_load_state("networkidle")
     cart = CartPage(user_page)
     expect(cart.items.first).to_be_visible(timeout=15_000)
     assert cart.get_item_count() >= 2
