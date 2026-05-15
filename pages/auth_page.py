@@ -28,7 +28,7 @@ class AuthPage(BasePage):
         self.register_error = page.locator("[data-test='register-error']")
 
     def open(self) -> "AuthPage":
-        self.page.goto(f"{BASE_URL}/auth/login")
+        self.page.goto(f"{BASE_URL}/auth/login", wait_until="domcontentloaded")
         self.page.wait_for_selector("[data-test='email']", state="visible", timeout=30_000)
         return self
 
@@ -38,7 +38,7 @@ class AuthPage(BasePage):
         self.login_button.click()
 
     def open_register(self) -> "AuthPage":
-        self.page.goto(f"{BASE_URL}/auth/register")
+        self.page.goto(f"{BASE_URL}/auth/register", wait_until="domcontentloaded")
         self.page.wait_for_selector("[data-test='first-name']", state="visible", timeout=30_000)
         return self
 

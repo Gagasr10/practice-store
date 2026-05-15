@@ -20,7 +20,9 @@ def test_add_multiple_products_to_cart(user_page: Page):
     ):
         ProductPage(user_page).add_to_cart()
 
-    user_page.goto(BASE_URL)
+    # Navigate home via SPA link to preserve Angular's in-memory cart state;
+    # a full goto() reloads the page and wipes the cart_id from memory.
+    user_page.locator("[data-test='nav-logo']").click()
     user_page.wait_for_selector("a[data-test^='product-']", state="visible", timeout=30_000)
     home.click_product(1)
     with user_page.expect_response(

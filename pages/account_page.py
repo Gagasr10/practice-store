@@ -12,24 +12,15 @@ class AccountPage(BasePage):
         self.invoice_rows = page.locator("[data-test='invoice-row']")
 
     def open(self) -> "AccountPage":
-        # Always warm up Angular on the home page first so the auth service has read
-        # the token before hitting the protected /account route.
+        # Navigate to the unguarded home page first so Angular's auth service resolves
+        # (getSignedInUser() HTTP call completes) before the protected /account route
+        # triggers its auth guard — avoids a redirect-to-login race on slow CI runners.
         self.page.goto(BASE_URL)
-        self.page.wait_for_selector("a[data-test^='product-']", state="visible", timeout=30_000)
+        # nav-menu appears only after getSignedInUser() resolves; waiting for it here
+        # guarantees auth state is ready before we hit the guarded route.
+        self.page.wait_for_selector("[data-test='nav-menu']", state="visible", timeout=30_000)
         self.page.goto(f"{BASE_URL}/account")
-        # nav-menu is the authenticated-user dropdown in the main nav — it appears as
-        # soon as Angular's auth service resolves and is always visible on every page.
-        # Account-section links (nav-invoices, nav-favorites, nav-profile) are inside
-        # this dropdown and are NOT directly visible until the dropdown is opened.
-        # email appears if the auth guard redirects to the login page instead.
-        self.page.wait_for_selector(
-            "[data-test='nav-menu'], [data-test='email']",
-            state="visible",
-            timeout=30_000,
-        )
-        if "/auth/login" in self.page.url:
-            self.page.goto(f"{BASE_URL}/account")
-            self.page.wait_for_selector("[data-test='nav-menu']", state="visible", timeout=30_000)
+        self.page.wait_for_selector("[data-test='nav-menu']", state="visible", timeout=30_000)
         return self
 
     def go_to_orders(self) -> "AccountPage":
