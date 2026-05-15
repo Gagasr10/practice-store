@@ -2,7 +2,7 @@ name: Allure Report (GitHub Pages)
 
 on:
   workflow_run:
-    workflows: ["Regression Tests"]
+    workflows: ["Regression Tests", "Smoke Tests"]
     types: [completed]
 
 permissions:
